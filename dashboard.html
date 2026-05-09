@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Writania</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    a, a:hover, h1, h2, h3, h4, h5, h6 { text-decoration: none !important; }
+  </style>
+  <style>
+    :root {
+      --dash-bg: #f8fafc;
+      --dash-surface: #ffffff;
+      --dash-border: #e2e8f0;
+      --dash-text: #0f172a;
+      --dash-muted: #64748b;
+    }
+
+    body {
+      background: var(--dash-bg);
+      font-family: var(--font-main);
+    }
+
+    /* Profile Header */
+    .profile-banner {
+      height: 280px;
+      width: 100%;
+      background: linear-gradient(135deg, #6366f1, #10b981, #38bdf8);
+      background-size: 200% 200%;
+      animation: gradientMove 15s ease infinite;
+      position: relative;
+    }
+
+    @keyframes gradientMove {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .profile-banner::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto 100px;
+      padding: 100px 24px 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: flex-end;
+      gap: 32px;
+      margin-bottom: 48px;
+      padding-top: 20px;
+    }
+
+    .profile-avatar {
+      width: 150px;
+      height: 150px;
+      border-radius: 40px;
+      border: 8px solid var(--dash-surface);
+      background: var(--bg-color);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      position: relative;
+      margin-bottom: -10px;
+      flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-info {
+        padding-bottom: 10px;
+    }
+
+    .profile-actions {
+      margin-left: auto;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .dash-card {
+      background: var(--dash-surface);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid var(--dash-border);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+      transition: var(--transition);
+    }
+
+    .dash-card-sidebar {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), #ffffff);
+      border-color: rgba(99, 102, 241, 0.1);
+    }
+
+    /* Layout Grid */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 32px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--dash-text);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Stats Grid micro */
+    .micro-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .micro-stat {
+      padding: 16px;
+      background: var(--dash-bg);
+      border-radius: 12px;
+      border: 1px dashed var(--dash-border);
+    }
+
+    .micro-stat-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      font-family: var(--font-pixel);
+      color: var(--primary);
+      margin-bottom: 2px;
+      line-height: 1;
+    }
+
+    .micro-stat-label {
+      font-size: 0.85rem; 
+      color: var(--dash-muted); 
+      font-weight: 600;
+    }
+
+    /* Lists */
+    .bio-text {
+      color: var(--dash-muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .social-links {
+      display: flex; 
+      gap: 16px; 
+      margin-bottom: 24px;
+    }
+
+    .social-links a {
+      color: var(--dash-muted); 
+      font-size: 1.4rem; 
+      transition: color 0.2s;
+    }
+
+    .story-card {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      border: 1px solid var(--dash-border);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+      background: var(--dash-surface);
+    }
+
+    .story-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .story-img {
+      width: 160px;
+      height: 120px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: var(--dash-bg);
+    }
+
+    .story-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Chart */
+    .chart-container {
+      height: 150px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .chart-bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-bar {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      background: var(--primary);
+      opacity: 0.8;
+      transition: all 0.3s;
+    }
+
+    .chart-bar:hover {
+      opacity: 1;
+      background: #10b981;
+    }
+
+    /* Tabs */
+    .dash-tabs {
+      display: flex;
+      gap: 24px;
+      border-bottom: 2px solid var(--dash-border);
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      padding: 12px 0;
+      font-weight: 600;
+      color: var(--dash-muted);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tab.active {
+      color: var(--dash-text);
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+    }
+
+    @media (max-width: 900px) {
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-top: -120px;
+      }
+
+      .profile-actions {
+        margin: 16px auto 0;
+      }
+
+      .story-card {
+        flex-direction: column;
+      }
+
+      .story-img {
+        width: 100%;
+        height: 180px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav"></nav>
+
+  <!-- Banner -->
+  <div class="profile-banner"></div>
+
+  <div class="dashboard-container">
+
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <!-- Will dynamically load avatar matching user's seed -->
+        <img id="dashAvatar" src="img/avatar1.png" alt="Avatar">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <h1 id="dashName"
+          style="font-size: 2.5rem; font-weight: 800; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.2;">
+          Creative Thinker</h1>
+        <p id="dashJoined"
+          style="color: rgba(255,255,255,0.9); font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">@creator ·
+          Joined March 2026</p>
+      </div>
+      <div class="profile-actions">
+        <button id="settingsBtn" class="btn btn-secondary"
+          style="background: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i
+            class="fa-solid fa-gear"></i> Settings</button>
+        <a href="write.html" class="btn btn-primary" style="box-shadow: 0 4px 12px rgba(99,102,241,0.4);"><i
+            class="fa-solid fa-pen-nib"></i> Write Story</a>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <!-- Sidebar -->
+      <aside>
+        <div class="dash-card dash-card-sidebar">
+          <h3 class="card-title">About Me <i class="fa-solid fa-pen-to-square" style="font-size: 0.8rem; color: var(--primary); cursor: pointer;" onclick="openSettings()"></i></h3>
+          <p id="profileBio" class="bio-text">Writer, thinker, and full-time coffee enthusiast. I write about technology, future startups, and design patterns. Trying to make sense of the world one paragraph at a time.</p>
+          <div id="profileSocials" class="social-links">
+            <a href="#" id="linkTwitter"><i class="fa-brands fa-twitter"></i></a>
+            <a href="#" id="linkGithub"><i class="fa-brands fa-github"></i></a>
+            <a href="#" id="linkWebsite"><i class="fa-solid fa-link"></i></a>
+          </div>
+        </div>
+
+        <div class="dash-card dash-card-sidebar">
+          <h3 class="card-title">Performance Stats</h3>
+          <div class="micro-stats">
+            <div class="micro-stat">
+              <i class="fa-solid fa-bolt" style="color: #6366f1; font-size: 0.8rem; margin-bottom: 8px; opacity: 0.7;"></i>
+              <div id="statViews" class="micro-stat-value">0</div>
+              <div class="micro-stat-label">Total Views</div>
+            </div>
+            <div class="micro-stat">
+              <i class="fa-solid fa-heart" style="color: #ef4444; font-size: 0.8rem; margin-bottom: 8px; opacity: 0.7;"></i>
+              <div id="statLikes" class="micro-stat-value">0</div>
+              <div class="micro-stat-label">Total Likes</div>
+            </div>
+            <div class="micro-stat">
+              <i class="fa-solid fa-fire" style="color: #f59e0b; font-size: 0.8rem; margin-bottom: 8px; opacity: 0.7;"></i>
+              <div id="statStreak" class="micro-stat-value">1</div>
+              <div class="micro-stat-label">Day Streak</div>
+            </div>
+            <div class="micro-stat">
+              <i class="fa-solid fa-users" style="color: #10b981; font-size: 0.8rem; margin-bottom: 8px; opacity: 0.7;"></i>
+              <div id="statFollowers" class="micro-stat-value">342</div>
+              <div class="micro-stat-label">Followers</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audience Chart -->
+        <div class="dash-card">
+          <h2 class="card-title">Audience Growth</h2>
+          <div class="chart-container">
+            <div class="chart-bar-wrap">
+              <div class="chart-bar" style="height: 30%;"></div>
+            </div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar" style="height: 45%;"></div>
+            </div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar" style="height: 40%;"></div>
+            </div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar" style="height: 70%;"></div>
+            </div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar" style="height: 60%;"></div>
+            </div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar" style="height: 90%;"></div>
+            </div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar" style="height: 100%; background: #10b981;"></div>
+            </div>
+          </div>
+          <p
+            style="text-align: center; font-size: 0.85rem; color: var(--dash-muted); margin-top: 16px; font-weight: 500;">
+            This Week vs Last Week Performance</p>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main>
+        <div class="dash-card" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+          <div class="dash-tabs" id="dashTabs">
+            <div class="tab active" data-tab="published">Published (<span id="pubCount">0</span>)</div>
+            <div class="tab" data-tab="drafts">Drafts (<span id="draftCount">0</span>)</div>
+            <div class="tab" data-tab="bookmarks">Bookmarks (<span id="bookmarkCount">0</span>)</div>
+          </div>
+
+          <div id="tabContent">
+            <div id="publishedTab" class="tab-pane active">
+              <div id="myStoriesList">
+              </div>
+            </div>
+            <div id="draftsTab" class="tab-pane" style="display: none;">
+              <div id="myDraftsList">
+              </div>
+            </div>
+            <div id="bookmarksTab" class="tab-pane" style="display: none;">
+              <div id="myBookmarksList">
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal"
+    style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+    <div
+      style="background:white; padding:40px; border-radius:var(--radius-lg); width:100%; max-width:560px; box-shadow:var(--shadow-lg); max-height:90vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="font-size:1.5rem; font-weight:800;">Profile Settings</h2>
+        <button id="closeSettings"
+          style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <form id="settingsForm">
+        <div class="input-group" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.85rem; margin-bottom:6px; font-weight:600;">Full Name</label>
+          <input type="text" id="set_name" class="input-field" required>
+        </div>
+        <div class="input-group" style="margin-bottom:16px;">
+          <label style="display:block; font-size:0.85rem; margin-bottom:6px; font-weight:600;">Bio</label>
+          <textarea id="set_bio" class="input-field" style="height:80px; resize:vertical;"></textarea>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+          <div class="input-group">
+            <label style="display:block; font-size:0.85rem; margin-bottom:6px; font-weight:600;">Twitter</label>
+            <input type="text" id="set_twitter" class="input-field" placeholder="@username">
+          </div>
+          <div class="input-group">
+            <label style="display:block; font-size:0.85rem; margin-bottom:6px; font-weight:600;">GitHub</label>
+            <input type="text" id="set_github" class="input-field" placeholder="username">
+          </div>
+        </div>
+
+        <!-- DiceBear Avatar Picker -->
+        <div style="margin-bottom:24px;">
+          <label style="display:block; font-size:0.85rem; margin-bottom:4px; font-weight:700; color:#0f172a;">🎭 Choose Your Avatar Character</label>
+          <p style="font-size:0.78rem; color:#94a3b8; margin-bottom:12px;">Pick a DiceBear character as your profile avatar</p>
+          <div id="dicebearGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; max-height:220px; overflow-y:auto; padding:10px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:16px;">
+            <!-- Populated by JS -->
+          </div>
+          <input type="hidden" id="set_avatar" value="">
+          <div style="display:flex; align-items:center; gap:10px; margin-top:14px; padding:12px 16px; background:#f0f4ff; border-radius:12px; border:1px solid rgba(99,102,241,0.2);">
+            <img id="selectedAvatarPreview" src="" style="width:44px; height:44px; border-radius:50%; border:2px solid #6366f1; object-fit:cover; display:none;">
+            <span id="selectedAvatarLabel" style="font-size:0.85rem; color:#64748b; font-weight:600;">No character selected yet</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Save Changes</button>
+      </form>
+    </div>
+  </div>
+  <script src="js/main.js"></script>
+  <script src="js/blog.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const currentUser = JSON.parse(localStorage.getItem('writania_currentUser'));
+      if (!currentUser) {
+        showToast('Please login to view your dashboard', 'error');
+        setTimeout(() => window.location.href = 'login.html', 1200);
+        return;
+      }
+
+      // --- FEATURE 4: PROMISE.ALL (Parallel Dashboard Data Loading) ---
+      /* 
+       * Demonstrates parallel execution of multiple Promises.
+       * A loading overlay covers the dashboard until all data resolves.
+       */
+      async function loadDashboardInParallel() {
+        // Show combined loading spinner
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'dashboardLoading';
+        loadingOverlay.innerHTML = '<div style="text-align:center; padding:100px; grid-column: 1 / -1;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--primary);"></i><p style="margin-top:16px; color:var(--text-secondary); font-weight:600;">Loading your dashboard securely...</p></div>';
+        
+        const grid = document.querySelector('.dash-grid');
+        grid.style.display = 'none'; // Hide grid initially
+        grid.before(loadingOverlay);
+        
+        try {
+          // Get data from localStorage (simulating async DB operations with delays)
+          const profileSetup = new Promise((resolve) => {
+            setTimeout(() => {
+              updateProfileUI();
+              resolve(true);
+            }, 300);
+          });
+          
+          const contentLoading = new Promise((resolve) => {
+            setTimeout(() => {
+              loadAllTabs();
+              setupTabs();
+              resolve(true);
+            }, 400);
+          });
+          
+          const statsCalculation = new Promise((resolve) => {
+            setTimeout(() => {
+              calculateStats();
+              setupSettingsModal();
+              resolve(true);
+            }, 350);
+          });
+          
+          // Run all three in parallel
+          await Promise.all([
+            profileSetup,
+            contentLoading,
+            statsCalculation
+          ]);
+          
+          // Show grid once all data is loaded
+          grid.style.display = 'grid';
+          
+        } catch (error) {
+          showToast('Error loading dashboard data', 'error');
+        } finally {
+          loadingOverlay.remove();
+        }
+      }
+
+      // Initialize the dashboard loading process
+      loadDashboardInParallel();
+
+      function updateProfileUI() {
+        document.getElementById('dashName').textContent = currentUser.name;
+        document.getElementById('dashJoined').innerHTML = `@${currentUser.name.split(' ')[0].toLowerCase()} &middot; Joined March 2026`;
+        document.getElementById('dashAvatar').src = getAvatarUrl(currentUser.avatar, currentUser.name);
+
+        const bioText = document.getElementById('display_bio');
+        if (bioText && currentUser.bio) bioText.textContent = currentUser.bio;
+
+        const twitterEl = document.getElementById('display_twitter');
+        const githubEl = document.getElementById('display_github');
+        
+        if (twitterEl) twitterEl.href = currentUser.twitter ? `https://twitter.com/${currentUser.twitter.replace('@', '')}` : '#';
+        if (githubEl) githubEl.href = currentUser.github ? `https://github.com/${currentUser.github}` : '#';
+      }
+
+      function setupTabs() {
+        const tabs = document.querySelectorAll('#dashTabs .tab');
+        const panes = document.querySelectorAll('.tab-pane');
+
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const target = tab.dataset.tab;
+
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            panes.forEach(p => {
+              p.style.display = p.id === `${target}Tab` ? 'block' : 'none';
+              if (p.id === `${target}Tab`) p.classList.add('active');
+              else p.classList.remove('active');
+            });
+          });
+        });
+      }
+
+      function loadAllTabs() {
+        renderPublished();
+        renderDrafts();
+        renderBookmarks();
+      }
+
+      function renderPublished() {
+        const blogs = JSON.parse(localStorage.getItem('writania_blogs')) || [];
+        const myBlogs = blogs.filter(b => b.authorId === currentUser.id || b.author === currentUser.name);
+        const storyList = document.getElementById('myStoriesList');
+        document.getElementById('pubCount').textContent = myBlogs.length;
+
+        if (myBlogs.length === 0) {
+          storyList.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px;">
+              <i class="fa-solid fa-pen-fancy" style="font-size: 3rem; color: var(--dash-border); margin-bottom: 20px;"></i>
+              <h3 style="font-size: 1.2rem; font-weight: 700;">No published stories yet.</h3>
+              <a href="write.html" class="btn btn-primary" style="margin-top: 16px;">Start Writing</a>
+            </div>
+          `;
+          return;
+        }
+
+        storyList.innerHTML = '';
+        myBlogs.forEach(blog => {
+          storyList.innerHTML += createStoryCard(blog, false);
+        });
+      }
+
+      function renderDrafts() {
+        const drafts = JSON.parse(localStorage.getItem('writania_drafts')) || [];
+        const myDrafts = drafts.filter(d => d.authorId === currentUser.id || d.author === currentUser.name);
+        const draftList = document.getElementById('myDraftsList');
+        document.getElementById('draftCount').textContent = myDrafts.length;
+
+        if (myDrafts.length === 0) {
+          draftList.innerHTML = `<div style="text-align:center; padding:40px; color:var(--dash-muted);">No drafts saved.</div>`;
+          return;
+        }
+
+        draftList.innerHTML = '';
+        myDrafts.forEach(draft => {
+          draftList.innerHTML += createStoryCard(draft, true);
+        });
+      }
+
+      function renderBookmarks() {
+        const blogs = JSON.parse(localStorage.getItem('writania_blogs')) || [];
+        const bookmarkIds = JSON.parse(localStorage.getItem('writania_bookmarks')) || [];
+        const bookmarkedBlogs = blogs.filter(b => bookmarkIds.includes(b.id));
+        const bookmarkList = document.getElementById('myBookmarksList');
+        document.getElementById('bookmarkCount').textContent = bookmarkedBlogs.length;
+
+        if (bookmarkedBlogs.length === 0) {
+          bookmarkList.innerHTML = `<div style="text-align:center; padding:40px; color:var(--dash-muted);">No bookmarked stories.</div>`;
+          return;
+        }
+
+        bookmarkList.innerHTML = '';
+        bookmarkedBlogs.forEach((blog, idx) => {
+          bookmarkList.innerHTML += createBookmarkCard(blog, idx);
+        });
+      }
+
+      function createBookmarkCard(blog, idx) {
+        return `
+            <div class="story-card" onclick="window.location.href='blog-detail.html?id=${blog.id}'" style="cursor:pointer;">
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    <div style="width: 60px; height: 60px; border-radius: 12px; background: url('${blog.image}') center/cover;"></div>
+                    <div>
+                        <h4 style="margin-bottom: 4px;">${blog.title}</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">${blog.author} &bull; ${new Date(blog.date).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); window.toggleBookmark(${blog.id})" style="padding: 6px 10px; font-size: 0.8rem; color: var(--primary);"><i class="fa-solid fa-bookmark"></i></button>
+                </div>
+            </div>
+        `;
+      }
+
+      function createStoryCard(blog, isDraft) {
+        const fallbackImg = `https://images.unsplash.com/photo-1456324504439-367cee3b3c32?auto=format&fit=crop&w=600`;
+        const link = isDraft ? `write.html?draft=${blog.id}` : `blog-detail.html?id=${blog.id}`;
+
+        return `
+          <div class="story-card">
+            <img src="${blog.image || fallbackImg}" alt="Cover" class="story-img" onclick="window.location.href='${link}'" style="cursor:pointer;">
+            <div class="story-details">
+              <div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; cursor:pointer;" onclick="window.location.href='${link}'">${blog.title}</h3>
+                <p style="font-size: 0.9rem; color: var(--dash-muted); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                  ${blog.excerpt || 'No preview available.'}
+                </p>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 12px; font-size: 0.85rem; color: var(--dash-muted);">
+                  <span><i class="fa-regular fa-calendar"></i> ${new Date(blog.date).toLocaleDateString()}</span>
+                  ${!isDraft ? `<span><i class="fa-solid fa-eye"></i> ${blog.views || 0}</span>` : ''}
+                  ${!isDraft ? `<span><i class="fa-solid fa-heart" style="color:#ef4444;"></i> ${blog.likes || 0}</span>` : ''}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-secondary" onclick="editStory(${blog.id}, ${isDraft})" style="padding: 6px 10px; font-size: 0.8rem; border: 1px solid var(--dash-border);"><i class="fa-solid fa-pen"></i></button>
+                  <button class="btn btn-secondary" onclick="deleteStory(${blog.id}, ${isDraft})" style="padding: 6px 10px; font-size: 0.8rem; border: 1px solid var(--dash-border); color: #ef4444;"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function calculateStats() {
+        const blogs = JSON.parse(localStorage.getItem('writania_blogs')) || [];
+        const myBlogs = blogs.filter(b => b.authorId === currentUser.id || b.author === currentUser.name);
+
+        let totalViews = 0;
+        let totalLikes = 0;
+        myBlogs.forEach(b => {
+          totalViews += (b.views || 0);
+          totalLikes += (b.likes || 0);
+        });
+
+        document.getElementById('statViews').textContent = formatNumber(totalViews);
+        document.getElementById('statLikes').textContent = formatNumber(totalLikes);
+        document.getElementById('statStreak').textContent = currentUser.streak || 1;
+
+        const bars = document.querySelectorAll('.chart-bar');
+        bars.forEach((bar, idx) => {
+          const h = Math.floor(Math.random() * 60) + 20 + (idx * 5);
+          bar.style.height = `${Math.min(h, 100)}%`;
+        });
+      }
+
+      function setupSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        const btn = document.getElementById('settingsBtn');
+        const close = document.getElementById('closeSettings');
+        const form = document.getElementById('settingsForm');
+
+        // --- DiceBear Character Styles ---
+        const dicebearStyles = [
+          { id: 'adventurer',    label: 'Adventurer',    emoji: '🧭' },
+          { id: 'avataaars',     label: 'Avataaars',     emoji: '😎' },
+          { id: 'big-ears',      label: 'Big Ears',      emoji: '👂' },
+          { id: 'bottts',        label: 'Bottts',        emoji: '🤖' },
+          { id: 'croodles',      label: 'Croodles',      emoji: '✏️' },
+          { id: 'fun-emoji',     label: 'Fun Emoji',     emoji: '🎉' },
+          { id: 'lorelei',       label: 'Lorelei',       emoji: '🌸' },
+          { id: 'micah',         label: 'Micah',         emoji: '🎨' },
+          { id: 'miniavs',       label: 'Miniavs',       emoji: '🙂' },
+          { id: 'open-peeps',    label: 'Open Peeps',    emoji: '🙋' },
+          { id: 'personas',      label: 'Personas',      emoji: '🎭' },
+          { id: 'pixel-art',     label: 'Pixel Art',     emoji: '👾' },
+        ];
+
+        function buildDicebearGrid(userName) {
+          const grid = document.getElementById('dicebearGrid');
+          if (!grid) return;
+          grid.innerHTML = '';
+          const seed = encodeURIComponent(userName || 'Writania');
+
+          dicebearStyles.forEach(style => {
+            const url = `https://api.dicebear.com/7.x/${style.id}/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
+            const cell = document.createElement('div');
+            cell.style.cssText = `
+              display:flex; flex-direction:column; align-items:center; gap:6px;
+              padding:10px 6px; border-radius:12px; cursor:pointer; border:2px solid transparent;
+              transition:all 0.25s ease; background:white;
+            `;
+
+            // Mark currently selected
+            const currentAvatar = document.getElementById('set_avatar').value;
+            if (currentAvatar && currentAvatar.includes(style.id)) {
+              cell.style.borderColor = '#6366f1';
+              cell.style.background = '#f0f0ff';
+            }
+
+            cell.innerHTML = `
+              <img src="${url}" style="width:56px; height:56px; border-radius:50%; border:2px solid #e2e8f0;" loading="lazy">
+              <span style="font-size:0.65rem; font-weight:700; color:#64748b; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:64px;">${style.emoji} ${style.label}</span>
+            `;
+
+            cell.onmouseenter = () => { if (document.getElementById('set_avatar').value !== url) cell.style.background = '#f8fafc'; };
+            cell.onmouseleave = () => { if (document.getElementById('set_avatar').value !== url) cell.style.background = 'white'; };
+
+            cell.onclick = () => {
+              // Deselect all
+              grid.querySelectorAll('div').forEach(c => {
+                c.style.borderColor = 'transparent';
+                c.style.background = 'white';
+              });
+              // Select this one
+              cell.style.borderColor = '#6366f1';
+              cell.style.background = '#f0f0ff';
+
+              document.getElementById('set_avatar').value = url;
+
+              // Update preview
+              const preview = document.getElementById('selectedAvatarPreview');
+              const label = document.getElementById('selectedAvatarLabel');
+              preview.src = url;
+              preview.style.display = 'block';
+              label.textContent = `${style.emoji} ${style.label} selected`;
+              label.style.color = '#6366f1';
+            };
+
+            grid.appendChild(cell);
+          });
+
+          // If user already has a DiceBear avatar set, show preview
+          if (currentUser.avatar && currentUser.avatar.includes('dicebear')) {
+            const preview = document.getElementById('selectedAvatarPreview');
+            const label = document.getElementById('selectedAvatarLabel');
+            preview.src = currentUser.avatar;
+            preview.style.display = 'block';
+            const matched = dicebearStyles.find(s => currentUser.avatar.includes(s.id));
+            label.textContent = matched ? `${matched.emoji} ${matched.label} selected` : 'DiceBear avatar active';
+            label.style.color = '#6366f1';
+            document.getElementById('set_avatar').value = currentUser.avatar;
+          }
+        }
+
+        btn.onclick = () => {
+          document.getElementById('set_name').value = currentUser.name;
+          document.getElementById('set_bio').value = currentUser.bio || '';
+          document.getElementById('set_twitter').value = currentUser.twitter || '';
+          document.getElementById('set_github').value = currentUser.github || '';
+          document.getElementById('set_avatar').value = '';
+          document.getElementById('selectedAvatarPreview').style.display = 'none';
+          document.getElementById('selectedAvatarLabel').textContent = 'No character selected yet';
+          document.getElementById('selectedAvatarLabel').style.color = '#64748b';
+          modal.style.display = 'flex';
+          // Build grid after a short delay to let modal render
+          setTimeout(() => buildDicebearGrid(currentUser.name), 50);
+        };
+
+        close.onclick = () => modal.style.display = 'none';
+        window.onclick = (e) => { if (e.target == modal) modal.style.display = 'none'; };
+
+        form.onsubmit = (e) => {
+          e.preventDefault();
+          currentUser.name = document.getElementById('set_name').value;
+          currentUser.bio = document.getElementById('set_bio').value;
+          currentUser.twitter = document.getElementById('set_twitter').value;
+          currentUser.github = document.getElementById('set_github').value;
+
+          const chosenAvatar = document.getElementById('set_avatar').value;
+          if (chosenAvatar) {
+            currentUser.avatar = chosenAvatar;
+          }
+
+          updateUser(currentUser);
+          modal.style.display = 'none';
+          updateProfileUI();
+          showToast('Profile updated successfully! 🎉');
+        };
+      }
+
+      // --- Global Function Exports ---
+      window.editStory = (id, isDraft) => {
+        window.location.href = `write.html?${isDraft ? 'draft' : 'edit'}=${id}`;
+      };
+
+      window.deleteStory = (id, isDraft) => {
+        if (!confirm(`Are you sure you want to delete this ${isDraft ? 'draft' : 'story'}?`)) return;
+
+        const key = isDraft ? 'writania_drafts' : 'writania_blogs';
+        let items = JSON.parse(localStorage.getItem(key)) || [];
+        items = items.filter(i => i.id !== id);
+        localStorage.setItem(key, JSON.stringify(items));
+
+        if (!isDraft) {
+          // Decrement user stories count
+          const users = JSON.parse(localStorage.getItem('writania_users')) || [];
+          const idx = users.findIndex(u => u.id === currentUser.id);
+          if (idx !== -1) {
+            users[idx].stories = Math.max(0, (users[idx].stories || 0) - 1);
+            localStorage.setItem('writania_users', JSON.stringify(users));
+            currentUser.stories = users[idx].stories;
+            localStorage.setItem('writania_currentUser', JSON.stringify(currentUser));
+          }
+        }
+
+        loadAllTabs();
+        calculateStats();
+        showToast('Deleted successfully.', 'info');
+      };
+
+      window.toggleBookmark = (id) => {
+        let bookmarks = JSON.parse(localStorage.getItem('writania_bookmarks')) || [];
+        const idx = bookmarks.indexOf(id);
+        if (idx > -1) bookmarks.splice(idx, 1);
+        else bookmarks.push(id);
+        localStorage.setItem('writania_bookmarks', JSON.stringify(bookmarks));
+        renderBookmarks();
+        showToast(idx > -1 ? 'Removed from reading list' : 'Saved to reading list');
+      };
+    });
+  </script>
+</body>
+
+</html>

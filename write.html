@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Write - Writania</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    a, a:hover, h1, h2, h3, h4, h5, h6 { text-decoration: none !important; }
+  </style>
+  <style>
+    .write-layout {
+      max-width: 900px;
+      margin: 100px auto 80px;
+      padding: 0 24px;
+    }
+
+    .editor-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid transparent;
+      overflow: hidden;
+    }
+
+    .editor-header {
+      padding: 40px 40px 10px;
+    }
+
+    .editor-title-input {
+      width: 100%;
+      font-size: 3.5rem;
+      font-weight: 800;
+      border: none;
+      outline: none;
+      font-family: var(--font-main);
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .editor-title-input::placeholder {
+      color: #e2e8f0;
+    }
+
+    .editor-meta {
+      display: flex;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 40px;
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toolbar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .toolbar-btn:hover {
+      background: white;
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .editor-content {
+      padding: 40px;
+      min-height: 500px;
+      outline: none;
+      font-size: 1.25rem;
+      line-height: 1.8;
+      color: #334155;
+    }
+
+    .editor-content[placeholder]:empty:before {
+      content: attr(placeholder);
+      color: #94a3b8;
+    }
+
+    .save-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  
+  <script>
+    // Route Protection: Redirect to signup if not logged in
+    if (!localStorage.getItem('writania_currentUser')) {
+      window.location.href = 'signup.html';
+    }
+  </script>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav"></nav>
+
+  <div class="write-layout">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h1 style="font-size: 2rem; font-weight: 800;">Draft <span class="text-cursive" style="color:var(--primary)">Story</span></h1>
+      <div id="saveStatus" style="font-size: 0.9rem; color: var(--text-secondary);">Saved automatically</div>
+    </div>
+
+    <div class="editor-card">
+      <div class="editor-header">
+        <input type="text" id="postTitle" class="editor-title-input" placeholder="Give it a catchy title...">
+        
+        <div class="editor-meta">
+          <select id="postCategory" class="input-field" style="width: 200px; padding: 8px 12px;">
+            <option value="" disabled selected>Select Category</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Wellness">Wellness</option>
+            <option value="Creativity">Creativity</option>
+            <option value="Technology">Technology</option>
+            <option value="Travel">Travel</option>
+          </select>
+          
+          <div style="flex:1;"></div>
+          
+          <div class="image-upload-wrapper">
+            <input type="file" id="imageInput" accept="image/*" style="display:none;">
+            <button class="btn btn-secondary" onclick="document.getElementById('imageInput').click()" style="padding:8px 16px; font-size:0.85rem;"><i class="fa-solid fa-image"></i> Add Cover</button>
+          </div>
+        </div>
+        
+        <div id="imagePreviewContainer" style="display:none; margin-top:20px; position:relative;">
+            <img id="imagePreview" src="" style="width:100%; height:300px; object-fit:cover; border-radius:var(--radius-lg); border:1px solid var(--border);">
+            <button onclick="removeImage()" style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.5); color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="toolbar-btn" onclick="document.execCommand('bold')" title="Bold"><i class="fa-solid fa-bold"></i></button>
+        <button class="toolbar-btn" onclick="document.execCommand('italic')" title="Italic"><i class="fa-solid fa-italic"></i></button>
+        <button class="toolbar-btn" onclick="document.execCommand('underline')" title="Underline"><i class="fa-solid fa-underline"></i></button>
+        <div style="width: 1px; background: var(--border); margin: 0 8px;"></div>
+        <button class="toolbar-btn" onclick="document.execCommand('insertUnorderedList')" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+        <button class="toolbar-btn" onclick="document.execCommand('insertOrderedList')" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+        <div style="width: 1px; background: var(--border); margin: 0 8px;"></div>
+        <button class="toolbar-btn" onclick="triggerBodyImage()" title="Insert Image"><i class="fa-solid fa-image" style="color:var(--teal)"></i></button>
+        <input type="file" id="bodyImageInput" accept="image/*" style="display:none;" onchange="handleBodyImage(this)">
+      </div>
+
+      <div id="postContent" class="editor-content" contenteditable="true" placeholder="Start writing your story here..."></div>
+    </div>
+
+
+    <div class="save-actions">
+      <button id="btnDraft" class="btn btn-secondary" style="font-family: var(--font-pixel); font-size: 0.6rem;">SAVE DRAFT</button>
+      <button id="btnPublish" class="btn btn-primary">Publish Story <i class="fa-solid fa-paper-plane" style="margin-left:8px"></i></button>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/blog.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const titleInput = document.getElementById('postTitle');
+      const categorySelect = document.getElementById('postCategory');
+      const contentEditor = document.getElementById('postContent');
+      const btnDraft = document.getElementById('btnDraft');
+      const btnPublish = document.getElementById('btnPublish');
+      const saveStatus = document.getElementById('saveStatus');
+      const imageInput = document.getElementById('imageInput');
+      const imagePreview = document.getElementById('imagePreview');
+      const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      const draftId = urlParams.get('draft');
+      let activeBlog = null;
+      let isDraftMode = !!draftId;
+      let uploadedImage = null;
+
+      // --- 1. Initialization & Pre-fill ---
+      if (editId || draftId) {
+        const key = draftId ? 'writania_drafts' : 'writania_blogs';
+        const items = JSON.parse(localStorage.getItem(key)) || [];
+        activeBlog = items.find(i => i.id == (editId || draftId));
+        
+        if (activeBlog) {
+          titleInput.value = activeBlog.title;
+          categorySelect.value = activeBlog.category;
+          contentEditor.innerHTML = activeBlog.content;
+
+          if (activeBlog.image && !activeBlog.image.includes('picsum')) {
+            uploadedImage = activeBlog.image;
+            imagePreview.src = uploadedImage;
+            imagePreviewContainer.style.display = 'block';
+          }
+          
+          if (editId) {
+            btnPublish.innerHTML = `Update Story <i class="fa-solid fa-rotate" style="margin-left:8px"></i>`;
+            document.querySelector('h1').innerHTML = `Edit <span class="text-cursive" style="color:var(--primary)">Story</span>`;
+          }
+        }
+      }
+
+      // --- 2. Image Handling ---
+      imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Image too large! Max 2MB.', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                uploadedImage = event.target.result;
+                imagePreview.src = uploadedImage;
+                imagePreviewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+      });
+
+      window.removeImage = () => {
+        uploadedImage = null;
+        imagePreview.src = '';
+        imagePreviewContainer.style.display = 'none';
+        imageInput.value = '';
+      };
+
+
+      let typingTimer;
+      contentEditor.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        saveStatus.textContent = 'Typing...';
+        
+        typingTimer = setTimeout(() => {
+          saveStatus.textContent = 'Ready to save';
+        }, 1000);
+      });
+
+      // --- 4. Auto-save ---
+      setInterval(() => {
+        if (contentEditor.innerText.trim().length > 20) {
+            handleSaveDraft(true); // silent autosave
+        }
+      }, 30000);
+
+      // --- FEATURE 3: CUSTOM PROMISE (Blog Publishing with Validation) ---
+      function publishBlogWithPromise(blogData) {
+        return new Promise((resolve, reject) => {
+          // Synchronous validation
+          if (!blogData.title || blogData.title.trim() === '') {
+            reject('Title is required');
+            return;
+          }
+          if (!blogData.category) {
+            reject('Please select a category');
+            return;
+          }
+          if (!blogData.content || blogData.content.trim().length < 50) {
+            reject('Content must be at least 50 characters long.');
+            return;
+          }
+          
+          // Simulate async save operation
+          setTimeout(() => {
+            try {
+              let blogs = JSON.parse(localStorage.getItem('writania_blogs')) || [];
+              const blogIdx = blogs.findIndex(b => b.id === blogData.id);
+              
+              if (blogIdx > -1) {
+                blogs[blogIdx] = blogData;
+              } else {
+                blogs.unshift(blogData);
+                // Increment stories count only on NEW publish
+                updateUserStoriesCount(JSON.parse(localStorage.getItem('writania_currentUser')), 1);
+              }
+              
+              localStorage.setItem('writania_blogs', JSON.stringify(blogs));
+
+              // If it was a draft, remove it synchronously
+              if (draftId || activeBlog) {
+                let drafts = JSON.parse(localStorage.getItem('writania_drafts')) || [];
+                localStorage.setItem('writania_drafts', JSON.stringify(drafts.filter(d => d.id != blogData.id)));
+              }
+              resolve('Blog published successfully!');
+            } catch (error) {
+              reject('Failed to save blog: ' + error.message);
+            }
+          }, 1500);
+        });
+      }
+
+      function handleSaveDraft(isAutosave = false) {
+        const title = titleInput.value.trim();
+        const category = categorySelect.value;
+        const html = contentEditor.innerHTML;
+        const text = contentEditor.innerText.trim();
+
+        if (!isAutosave && (!title || !category || text.length < 50)) {
+          showToast('Please provide a title, category, and more content!', 'error');
+          return;
+        }
+
+        const currentUser = JSON.parse(localStorage.getItem('writania_currentUser'));
+        const postData = buildPostDataObject(currentUser, title, category, html, text);
+
+        let drafts = JSON.parse(localStorage.getItem('writania_drafts')) || [];
+        const idx = drafts.findIndex(d => d.id === postData.id);
+        
+        if (idx > -1) drafts[idx] = postData;
+        else drafts.unshift(postData);
+        
+        localStorage.setItem('writania_drafts', JSON.stringify(drafts));
+        
+        saveStatus.textContent = `Draft saved at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        if (!isAutosave) showToast('Draft saved successfully!');
+      }
+
+      function handlePublish() {
+        const title = titleInput.value.trim();
+        const category = categorySelect.value;
+        const html = contentEditor.innerHTML;
+        const text = contentEditor.innerText.trim();
+        const currentUser = JSON.parse(localStorage.getItem('writania_currentUser'));
+        const postData = buildPostDataObject(currentUser, title, category, html, text);
+
+        // UI Loading State
+        const originalBtnText = btnPublish.innerHTML;
+        btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
+        btnPublish.disabled = true;
+
+        // Custom Promise execution
+        publishBlogWithPromise(postData)
+          .then(message => {
+            showToast(message, 'success');
+            setTimeout(() => window.location.href = 'dashboard.html', 1500);
+          })
+          .catch(error => {
+            btnPublish.innerHTML = originalBtnText;
+            btnPublish.disabled = false;
+            showToast(error, 'error');
+          });
+      }
+
+      function buildPostDataObject(currentUser, title, category, html, text) {
+        return {
+          id: activeBlog ? activeBlog.id : Date.now(),
+          title,
+          category,
+          content: html,
+          excerpt: text.substring(0, 120) + '...',
+          author: currentUser.name,
+          authorId: currentUser.id,
+          avatar: currentUser.avatar || currentUser.name,
+          image: uploadedImage || (activeBlog ? activeBlog.image : `https://picsum.photos/seed/writania${Date.now()}/800/600`),
+          likes: activeBlog ? activeBlog.likes : 0,
+          views: activeBlog ? activeBlog.views : 0,
+          comments: activeBlog ? activeBlog.comments : 0,
+          date: activeBlog ? activeBlog.date : new Date().toISOString(),
+          lastSaved: new Date().toISOString(),
+          readingTime: Math.ceil(text.split(/\s+/).length / 200) + ' min read'
+        };
+      }
+
+      function updateUserStoriesCount(user, diff) {
+        const users = JSON.parse(localStorage.getItem('writania_users')) || [];
+        const idx = users.findIndex(u => u.id === user.id);
+        if (idx > -1) {
+            users[idx].stories = Math.max(0, (users[idx].stories || 0) + diff);
+            localStorage.setItem('writania_users', JSON.stringify(users));
+            user.stories = users[idx].stories;
+            localStorage.setItem('writania_currentUser', JSON.stringify(user));
+        }
+      }
+
+      btnDraft.addEventListener('click', () => handleSaveDraft(false));
+      btnPublish.addEventListener('click', handlePublish);
+      window.handleBodyImage = (input) => {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imgHtml = `<img src="${e.target.result}" style="max-width:100%; border-radius:var(--radius); margin: 20px 0; display:block; box-shadow:var(--shadow-md);">`;
+          document.execCommand('insertHTML', false, imgHtml);
+          input.value = ''; // Reset input
+        };
+        reader.readAsDataURL(file);
+      };
+
+      window.triggerBodyImage = () => {
+        document.getElementById('bodyImageInput').click();
+      };
+    });
+  </script>
+</body>
+</html>

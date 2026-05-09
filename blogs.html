@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Blogs - Writania</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    a, a:hover, h1, h2, h3, h4, h5, h6 { text-decoration: none !important; }
+  </style>
+  <style>
+    .blogs-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      margin-top: 120px;
+      margin-bottom: 80px;
+    }
+
+    .filters-sidebar {
+      background: white;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+    }
+
+    .filter-section {
+      margin-bottom: 24px;
+    }
+
+    .filter-section h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-main);
+      margin-bottom: 12px;
+    }
+
+    .category-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .category-btn:hover, .category-btn.active {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .sort-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-main);
+      background: white;
+    }
+
+    .blogs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .blogs-layout {
+        grid-template-columns: 1fr;
+      }
+      .filters-sidebar {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav"></nav>
+
+  <div class="container blogs-layout">
+    <!-- Sidebar Filters -->
+    <div class="filters-sidebar">
+      <div class="filter-section">
+        <h3>Search</h3>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search title or author...">
+      </div>
+      
+      <div class="filter-section">
+        <h3>Categories</h3>
+        <button class="category-btn active" data-category="All">All Categories</button>
+        <button class="category-btn" data-category="Lifestyle">Lifestyle</button>
+        <button class="category-btn" data-category="Wellness">Wellness</button>
+        <button class="category-btn" data-category="Creativity">Creativity</button>
+        <button class="category-btn" data-category="Technology">Technology</button>
+        <button class="category-btn" data-category="Travel">Travel</button>
+      </div>
+      
+      <div class="filter-section">
+        <h3>Sort By</h3>
+        <select id="sortSelect" class="sort-select">
+          <option value="latest">Latest</option>
+          <option value="popular">Most Popular (Views)</option>
+          <option value="liked">Most Liked</option>
+        </select>
+      </div>
+
+      <div class="filter-section" style="margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
+        <button id="btnLoadSamples" onclick="fetchExternalBlogs()" class="btn btn-secondary" style="width: 100%; justify-content: center; font-family: var(--font-pixel); font-size: 0.6rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">Load Sample Blogs</button>
+      </div>
+
+      <div class="filter-section">
+        <h3>Date Range</h3>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <input type="date" id="startDate" class="input-field" style="padding: 8px; font-size: 0.85rem;" placeholder="Start Date">
+          <input type="date" id="endDate" class="input-field" style="padding: 8px; font-size: 0.85rem;" placeholder="End Date">
+        </div>
+      </div>
+    </div>
+
+    <!-- Blogs Grid -->
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 style="font-size: 2rem; font-weight: 800;">Discover <span class="text-cursive">Stories</span></h1>
+        <span class="text-secondary" id="resultsCount">0 Results</span>
+      </div>
+      
+      <div class="row g-5 py-3" id="blogsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/blog.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add listeners for date filters
+      const dateInputs = ['startDate', 'endDate'];
+      dateInputs.forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          window.currentBlogPage = 1;
+          loadBlogs();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

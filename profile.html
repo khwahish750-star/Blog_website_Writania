@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - Writania</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    a, a:hover, h1, h2, h3, h4, h5, h6 { text-decoration: none !important; }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .profile-header {
+      padding: 140px 0 60px;
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-color));
+      border-bottom: 1px solid var(--border);
+    }
+    .profile-container {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 24px;
+      object-fit: cover;
+    }
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 32px 0;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .blogs-section {
+      padding: 60px 0;
+    }
+    .profile-bio {
+      max-width: 600px;
+      margin: 0 auto 24px;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav"></nav>
+
+  <header class="profile-header">
+    <div class="container profile-container">
+      <img id="userAvatar" src="" alt="Avatar" class="profile-avatar">
+      <h1 id="userName" style="font-size: 2.5rem; font-weight: 800; margin-bottom: 8px;">Loading...</h1>
+      <p id="userHandle" style="color: var(--primary); font-weight: 600; margin-bottom: 16px;">@username</p>
+      <p id="userBio" class="profile-bio">This user hasn't written a bio yet.</p>
+      
+      <div class="profile-stats">
+        <div class="stat-item">
+          <span id="blogCount" class="stat-value">0</span>
+          <span class="stat-label">Stories</span>
+        </div>
+        <div class="stat-item">
+          <span id="followerCount" class="stat-value">0</span>
+          <span class="stat-label">Followers</span>
+        </div>
+        <div class="stat-item">
+          <span id="streakCount" class="stat-value">0</span>
+          <span class="stat-label">Streak</span>
+        </div>
+      </div>
+
+      <button id="followBtn" class="btn btn-primary" onclick="handleFollow()">Follow User</button>
+    </div>
+  </header>
+
+  <main class="blogs-section">
+    <div class="container">
+      <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 40px; text-align: center;">Published <span class="text-cursive">Stories</span></h2>
+      <div id="userBlogsGrid" class="blogs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+        <!-- JS POPOULATED -->
+      </div>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/blog.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('id');
+      
+      if (!userId) {
+        window.location.href = 'blogs.html';
+        return;
+      }
+
+      // Load user data
+      const users = JSON.parse(localStorage.getItem('writania_users')) || [];
+      const user = users.find(u => u.id == userId);
+
+      if (!user) {
+        showToast('User not found', 'error');
+        setTimeout(() => window.location.href = 'blogs.html', 2000);
+        return;
+      }
+
+      // Populate UI
+      document.getElementById('userAvatar').src = getAvatarUrl(user.avatar, user.name);
+      document.getElementById('userName').textContent = user.name;
+      document.getElementById('userHandle').textContent = `@${user.name.split(' ')[0].toLowerCase()}`;
+      document.getElementById('userBio').textContent = user.bio || "Crafting stories and sharing ideas on Writania.";
+      document.getElementById('streakCount').textContent = user.streak || 0;
+      
+      // Followers (mock persistent)
+      const followersKey = `writania_followers_${userId}`;
+      let followers = parseInt(localStorage.getItem(followersKey)) || Math.floor(Math.random() * 500) + 50;
+      document.getElementById('followerCount').textContent = formatNumber(followers);
+
+      window.handleFollow = () => {
+        followers++;
+        localStorage.setItem(followersKey, followers);
+        document.getElementById('followerCount').textContent = formatNumber(followers);
+        document.getElementById('followBtn').disabled = true;
+        document.getElementById('followBtn').textContent = 'Following';
+        showToast(`You are now following ${user.name}`);
+      };
+
+      // Load User's Blogs
+      const allBlogs = JSON.parse(localStorage.getItem('writania_blogs')) || [];
+      const userBlogs = allBlogs.filter(b => b.authorId == userId);
+      document.getElementById('blogCount').textContent = userBlogs.length;
+
+      const grid = document.getElementById('userBlogsGrid');
+      if (userBlogs.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary);">This user hasn\'t published any stories yet.</div>';
+      } else {
+        userBlogs.forEach((blog, idx) => {
+          const card = createBlogCard(blog, idx);
+          grid.appendChild(card);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

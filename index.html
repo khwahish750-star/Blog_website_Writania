@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writania - Write, Share, Inspire</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Specific Book Hover CSS to ensure it opens */
+    .book-container:hover .book {
+      transform: translateX(80px);
+      /* Adjust for centering */
+    }
+
+    .book-container:hover .book-cover,
+    .book-container.scrolled-open .book-cover {
+      transform: rotateY(-130deg);
+      box-shadow: none;
+    }
+
+    .book-container:hover .book-open-cta,
+    .book-container.scrolled-open .book-open-cta {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .book-container:hover .typewriter-text,
+    .book-container.scrolled-open .typewriter-text {
+      animation: typewriter 2.5s steps(40, end) 0.5s forwards, blinkTextCursor 0.75s step-end infinite;
+    }
+
+    .book-open-cta {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 80%;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.6s;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin: 60px 0;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 40px 30px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary);
+    }
+
+    .feature-icon {
+      font-size: 40px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    .trending-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: 40px 0;
+    }
+
+    .blog-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .blog-image-placeholder {
+      height: 200px;
+      background: linear-gradient(135deg, var(--bg-color), #e2e8f0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 3rem;
+    }
+
+    .blog-content {
+      padding: 24px;
+    }
+
+    .blog-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.875rem;
+    }
+
+    .blog-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .blog-excerpt {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      display: -webkit-box;
+      -webkit-line-caamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .blog-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .author-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .author-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 100px 20px;
+      background: linear-gradient(180deg, var(--bg-color) 0%, white 100%);
+      border-radius: var(--radius-lg);
+      margin-top: 60px;
+    }
+
+    @media (max-width: 900px) {
+      .trending-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .trending-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @keyframes scrollMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); } 
+    }
+
+    /* 3D Avatar Float Animation */
+    @keyframes float3D {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-14px) scale(1.03); }
+    }
+
+    @keyframes floatDelay {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-10px) scale(1.02); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(99,102,241,0.2), 0 20px 40px rgba(99,102,241,0.1); }
+      50% { box-shadow: 0 0 0 6px rgba(99,102,241,0.4), 0 20px 50px rgba(99,102,241,0.25); }
+    }
+
+    @keyframes glowPulseTeal {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(20,184,166,0.2), 0 20px 40px rgba(20,184,166,0.1); }
+      50% { box-shadow: 0 0 0 6px rgba(20,184,166,0.5), 0 20px 50px rgba(20,184,166,0.3); }
+    }
+
+    @keyframes glowPulseOrange {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(245,158,11,0.2), 0 20px 40px rgba(245,158,11,0.1); }
+      50% { box-shadow: 0 0 0 6px rgba(245,158,11,0.5), 0 20px 50px rgba(245,158,11,0.3); }
+    }
+
+    /* Enhanced Author Card Styles */
+    .author-card-3d {
+      background: white;
+      border-radius: 32px;
+      padding: 36px 20px 28px;
+      width: 240px;
+      min-width: 240px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.06);
+      margin: 0 18px;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: visible;
+    }
+
+    .author-card-3d:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 30px 60px rgba(99,102,241,0.15);
+    }
+
+    .author-card-3d.highlighted-card {
+      border-color: #6366f1;
+      background: linear-gradient(145deg, #fafafe, #f0f0ff);
+    }
+
+    .avatar-3d-wrapper {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+      background: linear-gradient(135deg, #f0f4ff, #e8f8f5);
+    }
+
+    .avatar-3d-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      transition: transform 0.4s ease;
+    }
+
+    .author-card-3d:hover .avatar-3d-wrapper img {
+      transform: scale(1.08);
+    }
+
+    .avatar-3d-float {
+      animation: float3D 3.5s ease-in-out infinite;
+    }
+    .avatar-3d-float-2 {
+      animation: floatDelay 4s ease-in-out infinite;
+      animation-delay: 0.8s;
+    }
+    .avatar-3d-float-3 {
+      animation: float3D 3.2s ease-in-out infinite;
+      animation-delay: 1.5s;
+    }
+    .avatar-3d-float-4 {
+      animation: floatDelay 3.8s ease-in-out infinite;
+      animation-delay: 0.4s;
+    }
+
+    .glow-indigo { animation: glowPulse 3s ease-in-out infinite; }
+    .glow-teal { animation: glowPulseTeal 3s ease-in-out infinite; }
+    .glow-orange { animation: glowPulseOrange 3s ease-in-out infinite; }
+
+    .author-name-3d {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .author-genre-3d {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6366f1;
+      margin-bottom: 14px;
+    }
+
+    .author-followers-3d {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 8px 16px;
+      border-radius: 50px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .rank-badge {
+      position: absolute;
+      top: -10px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: white;
+      z-index: 5;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav"></nav>
+
+  <!-- Hero Section -->
+  <section class="hero" style="overflow-x: hidden; position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <!-- Background elements for depth -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 60%); z-index: -1;"></div>
+
+    <div class="container hero-content" style="max-width: 1000px; width: 100%; z-index: 10; padding-top: 40px;">
+      
+      <!-- Interactive Book FRONT & CENTER -->
+      <div class="book-container" id="parallax-book" style="margin: 0 auto 60px; transform: scale(1.3); transition: transform 0.1s linear;">
+        <div class="book">
+          <!-- Back Cover -->
+          <div class="book-page" style="transform: translateZ(-2px);"></div>
+          
+          <!-- Page Content (Blue background when open) -->
+          <div class="book-page" style="background-color: #eff6ff;">
+            <div class="book-open-cta">
+              <div class="typewriter-text" style="font-size: 1.2rem; margin-bottom: 24px; text-align: left;">Every story begins<br>with a single word...</div>
+              <h3 class="text-gradient" style="font-size: 1.8rem; margin-bottom: 24px;">Welcome to Writania.</h3>
+              <a href="write.html" class="btn btn-primary" style="font-family: var(--font-pixel); font-size: 0.6rem; padding: 16px 24px;">Start Writing ✍️</a>
+            </div>
+          </div>
+          
+          <!-- Front Cover -->
+          <div class="book-cover">
+            <i class="fa-solid fa-book-open" style="font-size: 3rem; margin-bottom: 16px;"></i>
+            <h2 class="text-cursive" style="font-size: 2.5rem; color: white;">Writania</h2>
+            <p style="font-family: var(--font-pixel); font-size: 0.5rem; margin-top: 20px; opacity: 0.8;">HOVER TO OPEN</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Impact Typographic Text (Replaces rotating text) -->
+      <div style="text-align: center; margin-top: 80px; position: relative; z-index: 10;">
+        <h1 style="font-size: clamp(3rem, 6vw, 5.5rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.04em; color: #010101; margin-bottom: 20px;">
+          Stop dreaming.<br>
+          Start <span style="position: relative; display: inline-block;">creating<span style="color: #10b981;">.</span></span>
+        </h1>
+        <p style="font-size: clamp(1.1rem, 2vw, 1.4rem); color: #64748b; max-width: 600px; margin: 0 auto; line-height: 1.6; font-weight: 500;">
+          Turn your fleeting ideas into published masterpieces. Join the platform built specifically for visionaries and storytellers.
+        </p>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Content below fold safely positioned -->
+  <div style="position: relative; background: var(--bg-color); z-index: 20; padding-top: 60px;">
+    <div class="container">
+
+      <!-- Auto-scrolling Carousel -->
+      <section style="text-align: center; margin-bottom: 120px; overflow: hidden; position: relative; background: rgba(99, 102, 241, 0.02); padding: 60px 0; border-radius: 24px;">
+        <!-- Decorative Background Elements -->
+        <div style="position: absolute; top: 0; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%); z-index: 0;"></div>
+        <div style="position: absolute; bottom: 0; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%); z-index: 0;"></div>
+
+        <h2 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 16px; position: relative; z-index: 1;">
+          Meet Our <span class="pill-highlight pill-orange" style="color: #c2410c; margin-top: 12px;">Top</span> Authors
+        </h2>
+        <p class="text-secondary" style="max-width: 600px; margin: 0 auto; font-size: 1.2rem; line-height: 1.6; position: relative; z-index: 1;">
+          Join thousands of incredible storytellers building their audience on Writania every single day.
+        </p>
+        
+        <div class="image-carousel-container" style="padding: 50px 0 70px; position: relative; z-index: 1; overflow: hidden;">
+          <div class="image-carousel-track" style="animation: scrollCarousel 25s linear infinite;">
+
+            <!-- Card 1: Sophia L. -->
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#f59e0b,#ef4444);">🥇</div>
+              <div class="avatar-3d-wrapper glow-teal avatar-3d-float">
+                <img src="img/avatar1.png" alt="Sophia L.">
+              </div>
+              <div class="author-name-3d">Sophia L.</div>
+              <div class="author-genre-3d">✨ Fiction · Travel</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#14b8a6;"></i> 14.2K Followers
+              </div>
+            </div>
+
+            <!-- Card 2: Oliver C. (Highlighted) -->
+            <div class="author-card-3d highlighted-card">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#6366f1,#8b5cf6);">🥈</div>
+              <div class="avatar-3d-wrapper glow-indigo avatar-3d-float-2">
+                <img src="img/avatar2.png" alt="Oliver C.">
+              </div>
+              <div class="author-name-3d">Oliver C.</div>
+              <div class="author-genre-3d">🚀 Tech · Startups</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#6366f1;"></i> 21.8K Followers
+              </div>
+            </div>
+
+            <!-- Card 3: Amara K. -->
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#10b981,#06b6d4);">🥉</div>
+              <div class="avatar-3d-wrapper glow-orange avatar-3d-float-3" style="background: linear-gradient(135deg,#fff7ed,#fef3c7);">
+                <img src="img/avatar3.png" alt="Amara K.">
+              </div>
+              <div class="author-name-3d">Amara K.</div>
+              <div class="author-genre-3d">🧠 Psychology · Wellness</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#f59e0b;"></i> 12.4K Followers
+              </div>
+            </div>
+
+            <!-- Card 4: Elena R. -->
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#a855f7,#ec4899);">⭐</div>
+              <div class="avatar-3d-wrapper glow-indigo avatar-3d-float-4" style="background: linear-gradient(135deg,#faf5ff,#f0f4ff);">
+                <img src="img/avatar1.png" alt="Elena R.">
+              </div>
+              <div class="author-name-3d">Elena R.</div>
+              <div class="author-genre-3d">🎨 Creativity · Art</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#a855f7;"></i> 9.7K Followers
+              </div>
+            </div>
+
+            <!-- Card 5: Marcus T. -->
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#0ea5e9,#6366f1);">⭐</div>
+              <div class="avatar-3d-wrapper glow-teal avatar-3d-float" style="background: linear-gradient(135deg,#ecfdf5,#f0f9ff);">
+                <img src="img/avatar2.png" alt="Marcus T.">
+              </div>
+              <div class="author-name-3d">Marcus T.</div>
+              <div class="author-genre-3d">💡 Science · Future</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#0ea5e9;"></i> 7.3K Followers
+              </div>
+            </div>
+
+            <!-- Duplicate set for seamless infinite loop -->
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#f59e0b,#ef4444);">🥇</div>
+              <div class="avatar-3d-wrapper glow-teal avatar-3d-float">
+                <img src="img/avatar1.png" alt="Sophia L.">
+              </div>
+              <div class="author-name-3d">Sophia L.</div>
+              <div class="author-genre-3d">✨ Fiction · Travel</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#14b8a6;"></i> 14.2K Followers
+              </div>
+            </div>
+
+            <div class="author-card-3d highlighted-card">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#6366f1,#8b5cf6);">🥈</div>
+              <div class="avatar-3d-wrapper glow-indigo avatar-3d-float-2">
+                <img src="img/avatar2.png" alt="Oliver C.">
+              </div>
+              <div class="author-name-3d">Oliver C.</div>
+              <div class="author-genre-3d">🚀 Tech · Startups</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#6366f1;"></i> 21.8K Followers
+              </div>
+            </div>
+
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#10b981,#06b6d4);">🥉</div>
+              <div class="avatar-3d-wrapper glow-orange avatar-3d-float-3" style="background: linear-gradient(135deg,#fff7ed,#fef3c7);">
+                <img src="img/avatar3.png" alt="Amara K.">
+              </div>
+              <div class="author-name-3d">Amara K.</div>
+              <div class="author-genre-3d">🧠 Psychology · Wellness</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#f59e0b;"></i> 12.4K Followers
+              </div>
+            </div>
+
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#a855f7,#ec4899);">⭐</div>
+              <div class="avatar-3d-wrapper glow-indigo avatar-3d-float-4" style="background: linear-gradient(135deg,#faf5ff,#f0f4ff);">
+                <img src="img/avatar1.png" alt="Elena R.">
+              </div>
+              <div class="author-name-3d">Elena R.</div>
+              <div class="author-genre-3d">🎨 Creativity · Art</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#a855f7;"></i> 9.7K Followers
+              </div>
+            </div>
+
+            <div class="author-card-3d">
+              <div class="rank-badge" style="background: linear-gradient(135deg,#0ea5e9,#6366f1);">⭐</div>
+              <div class="avatar-3d-wrapper glow-teal avatar-3d-float" style="background: linear-gradient(135deg,#ecfdf5,#f0f9ff);">
+                <img src="img/avatar2.png" alt="Marcus T.">
+              </div>
+              <div class="author-name-3d">Marcus T.</div>
+              <div class="author-genre-3d">💡 Science · Future</div>
+              <div class="author-followers-3d">
+                <i class="fa-solid fa-users" style="color:#0ea5e9;"></i> 7.3K Followers
+              </div>
+            </div>
+
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; position: relative; z-index: 1;">
+          <a href="write.html" class="btn btn-primary" style="padding: 14px 32px; font-size: 1.1rem; border-radius: 40px; box-shadow: var(--shadow-md);">Start Writing Today</a>
+        </div>
+      </section>
+
+      <!-- NEW STYLE Carousel: Trending Tape Marquee -->
+      <section style="background: #0f172a; color: white; padding: 40px 0; overflow: hidden; transform: rotate(-2deg) scale(1.05); margin: 120px 0; z-index: 10; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+        <div style="display: flex; white-space: nowrap; animation: scrollMarquee 30s linear infinite;">
+          <h2 style="font-size: 3rem; font-weight: 800; font-family: var(--font-pixel); color: #38bdf8; margin: 0; padding-right: 40px; text-transform: uppercase;">* FICTION * CREATIVITY * WELLNESS * LIFESTYLE * STARTUPS * TECHNOLOGY * FICTION * CREATIVITY * WELLNESS * LIFESTYLE * STARTUPS * TECHNOLOGY *</h2>
+          <h2 style="font-size: 3rem; font-weight: 800; font-family: var(--font-pixel); color: #38bdf8; margin: 0; padding-right: 40px; text-transform: uppercase;">* FICTION * CREATIVITY * WELLNESS * LIFESTYLE * STARTUPS * TECHNOLOGY * FICTION * CREATIVITY * WELLNESS * LIFESTYLE * STARTUPS * TECHNOLOGY *</h2>
+        </div>
+      </section>
+
+
+
+      <!-- Stats Section -->
+      <section class="py-5 my-5">
+        <div class="row g-4 text-center">
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <h3 class="text-gradient display-6 fw-bold mb-2">10K+</h3>
+              <p class="text-secondary fw-medium mb-0">Active Writers</p>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <h3 class="text-gradient display-6 fw-bold mb-2">50K+</h3>
+              <p class="text-secondary fw-medium mb-0">Stories Published</p>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <h3 class="text-gradient display-6 fw-bold mb-2">2M+</h3>
+              <p class="text-secondary fw-medium mb-0">Monthly Readers</p>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <h3 class="text-gradient display-6 fw-bold mb-2">98%</h3>
+              <p class="text-secondary fw-medium mb-0">Satisfaction Rate</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Topics Flexbox Grid -->
+      <section class="alphabet-section">
+        <div style="text-align: center;">
+          <h2 style="font-size: 2.5rem; font-weight: 800;">Explore <span class="pill-highlight pill-blue">Topics</span></h2>
+          <p class="text-secondary" style="margin-top: 16px; max-width: 600px; margin-inline: auto;">Dive into a diverse range of subjects tailored to your interests. This beautifully responsive layout demonstrates CSS Flexbox dynamically arranging content.</p>
+        </div>
+        
+        <div class="alphabet-grid">
+          <div class="alphabet-row">
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">✨ Fiction</div>
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">💡 Technology</div>
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">🌿 Wellness</div>
+          </div>
+          <div class="alphabet-row">
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">🚀 Startups</div>
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">🎨 Creativity</div>
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">✈️ Travel</div>
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">📚 Education</div>
+          </div>
+          <div class="alphabet-row">
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">🧠 Psychology</div>
+            <div class="letter-box" style="width: auto; padding: 0 24px; font-size: 1.2rem;">🥗 Lifestyle</div>
+          </div>
+        </div>
+      </section>
+
+
+
+      <!-- Features Section -->
+      <section class="py-5 my-5">
+        <div class="container text-center mb-5">
+          <h2 class="display-5 fw-bold">Everything you need to <span class="text-cursive">create</span></h2>
+        </div>
+        <div class="row g-4 justify-content-center">
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card h-100">
+              <i class="fa-solid fa-robot feature-icon"></i>
+              <h3 class="h5 fw-bold mb-3">Professional Avatars</h3>
+              <p class="text-secondary mb-0">Choose from a variety of premium styles to represent your unique identity.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card h-100">
+              <i class="fa-solid fa-trophy feature-icon" style="color: var(--gold)"></i>
+              <h3 class="h5 fw-bold mb-3">Leaderboard System</h3>
+              <p class="text-secondary mb-0">Climb the ranks! Earn points for likes and published stories to reach the top spots.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card h-100">
+              <i class="fa-solid fa-bolt feature-icon" style="color: var(--accent-pixel)"></i>
+              <h3 class="h5 fw-bold mb-3">Fast Publishing</h3>
+              <p class="text-secondary mb-0">Turn your ideas into live stories in seconds with our lightning-fast editor.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="feature-card h-100">
+              <i class="fa-solid fa-chart-pie feature-icon" style="color: var(--accent-cursive)"></i>
+              <h3 class="h5 fw-bold mb-3">Real-time Analytics</h3>
+              <p class="text-secondary mb-0">Track your views, likes, and engagement directly from your personal dashboard.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Trending Blogs Section -->
+      <section id="trending-blogs" class="py-5 my-5">
+        <div class="container">
+          <div class="d-flex justify-content-between align-items-end mb-5">
+            <h2 class="display-5 fw-bold mb-0">Trending <span class="text-cursive" style="color: var(--primary)">Stories</span></h2>
+            <a href="blogs.html" class="btn btn-secondary">View All <i class="fa-solid fa-arrow-right ms-2"></i></a>
+          </div>
+          <div class="row g-4" id="trending-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured Read of the Week -->
+      <section id="featured-read" style="margin: 80px 0 60px; padding: 60px 40px; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); border-radius: 32px; position: relative; overflow: hidden;">
+        <!-- Decorative glows -->
+        <div style="position: absolute; top: -80px; left: -80px; width: 350px; height: 350px; background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%); pointer-events: none;"></div>
+        <div style="position: absolute; bottom: -80px; right: -80px; width: 350px; height: 350px; background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%); pointer-events: none;"></div>
+
+        <div style="display: flex; align-items: center; gap: 60px; flex-wrap: wrap; position: relative; z-index: 2;">
+          <!-- Book Cover -->
+          <div style="flex: 0 0 auto; position: relative;">
+            <div style="width: 220px; height: 300px; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.6), -8px 8px 0 rgba(99,102,241,0.4); position: relative;">
+              <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&q=85" alt="Featured Book Cover" style="width: 100%; height: 100%; object-fit: cover;">
+              <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4) 100%);"></div>
+            </div>
+            <!-- Badge -->
+            <div style="position: absolute; top: -14px; right: -14px; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; font-weight: 800; font-size: 0.7rem; padding: 8px 14px; border-radius: 40px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(239,68,68,0.4);">
+              📖 This Week
+            </div>
+          </div>
+
+          <!-- Book Info -->
+          <div style="flex: 1; min-width: 280px;">
+            <p style="color: #a5b4fc; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px;">📖 Featured Read of the Week</p>
+            <h2 style="font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 900; color: white; line-height: 1.1; margin-bottom: 12px;">The Midnight Library</h2>
+            <p style="color: #a5b4fc; font-size: 1.05rem; font-weight: 600; margin-bottom: 24px;">by Matt Haig</p>
+            <p style="color: #cbd5e1; font-size: 1.05rem; line-height: 1.8; max-width: 520px; margin-bottom: 36px;">
+              Between life and death there is a library. In it, every book tells the story of a different life you could have lived. Nora Seed discovers the infinite possibilities of what could have been — a breathtaking story about hope, regret, and the courage to change.
+            </p>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+              <a href="blogs.html" id="featured-read-btn" class="btn btn-primary">
+                Read Now <i class="fa-solid fa-arrow-right"></i>
+              </a>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span style="color: #fbbf24; font-size: 1.1rem;">★★★★★</span>
+                <span style="color: #94a3b8; font-size: 0.9rem;">4.8 / 5 &nbsp;·&nbsp; 2,341 readers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer / CTA -->
+      <section class="cta-section">
+        <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 24px;">Ready to share your voice?</h2>
+        <p class="text-secondary" style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 40px;">Join thousands of writers on Writania. Your first masterpiece is just a few keystrokes away.</p>
+        <a href="write.html" class="btn btn-primary" style="font-size: 1.1rem; padding: 16px 36px; font-family: var(--font-main);">Start Writing Now <i class="fa-solid fa-pen-nib" style="margin-left: 8px;"></i></a>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/blog.js"></script>
+  <script>
+    // JS Parallax Effect for Book (Fixed to prevent overlap)
+    window.addEventListener('scroll', () => {
+      const scrollPos = window.scrollY;
+      const book = document.getElementById('parallax-book');
+      if (book) {
+        // Stop using translateY so it doesn't overlap text. Just scale up slightly and trigger open state.
+        const newScale = Math.min(1.3 + (scrollPos * 0.001), 1.8);
+        book.style.transform = `scale(${newScale})`;
+        
+        if (scrollPos > 30) {
+          book.classList.add('scrolled-open');
+        } else {
+          book.classList.remove('scrolled-open');
+        }
+      }
+    });
+
+
+  </script>
+
+</body>
+</html>

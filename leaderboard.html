@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - Writania</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Prevent Bootstrap from underlining links and headings */
+    a, a:hover, h1, h2, h3, h4, h5, h6 {
+      text-decoration: none !important;
+    }
+    
+    .leaderboard-layout {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 40px;
+      margin-top: 120px;
+      margin-bottom: 80px;
+    }
+    
+    .avatar-card {
+      background: var(--bg-card);
+      padding: 30px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 100px;
+    }
+
+    .avatar-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      margin: 0 auto 20px;
+      border: 4px solid var(--primary);
+    }
+
+    /* DiceBear Picker Styles */
+    .dicebear-section-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      margin: 24px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dicebear-section-title::before,
+    .dicebear-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .dicebear-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      background: var(--bg-color);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .db-tab {
+      flex: 1;
+      padding: 6px 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .db-tab.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(99,102,241,0.15);
+    }
+
+    .dicebear-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 2px 2px 6px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) transparent;
+    }
+    .dicebear-grid::-webkit-scrollbar { width: 4px; }
+    .dicebear-grid::-webkit-scrollbar-track { background: transparent; }
+    .dicebear-grid::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+    .db-card {
+      position: relative;
+      border-radius: 16px;
+      padding: 10px 6px 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      background: var(--bg-color);
+    }
+    .db-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      border-radius: 14px;
+    }
+    .db-card:hover {
+      transform: translateY(-4px) scale(1.04);
+      border-color: rgba(99,102,241,0.4);
+      box-shadow: 0 8px 24px rgba(99,102,241,0.15);
+    }
+    .db-card.selected {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.2), 0 10px 28px rgba(99,102,241,0.2);
+      transform: translateY(-3px) scale(1.05);
+    }
+    .db-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 5px;
+      right: 7px;
+      width: 18px;
+      height: 18px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-size: 0.6rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 18px;
+      text-align: center;
+    }
+    .db-avatar-img {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .db-card:hover .db-avatar-img {
+      transform: scale(1.08);
+    }
+    .db-style-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      letter-spacing: 0.03em;
+    }
+    .db-card.selected .db-style-label {
+      color: var(--primary);
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 12px;
+    }
+
+    .leaderboard-table th {
+      text-align: left;
+      padding: 0 20px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+
+    .leaderboard-table td {
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid transparent;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.2s ease;
+    }
+
+    .leaderboard-table tr td:first-child {
+      border-left: 1px solid var(--border);
+      border-top-left-radius: var(--radius);
+      border-bottom-left-radius: var(--radius);
+    }
+
+    .leaderboard-table tr td:last-child {
+      border-right: 1px solid var(--border);
+      border-top-right-radius: var(--radius);
+      border-bottom-right-radius: var(--radius);
+    }
+
+    .leaderboard-table tbody tr {
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease;
+    }
+
+    .leaderboard-table tbody tr:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .rank-cell {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      width: 60px;
+    }
+
+    .rank-1 { color: var(--gold); }
+    .rank-2 { color: var(--silver); }
+    .rank-3 { color: var(--bronze); }
+    
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: var(--font-pixel);
+    }
+
+    @media (max-width: 900px) {
+      .leaderboard-layout {
+        grid-template-columns: 1fr;
+      }
+      .avatar-card {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-nav"></nav>
+
+  <div class="container leaderboard-layout">
+    <!-- Left Column: Your Stats Card -->
+    <div>
+      <div class="avatar-card">
+        <h2 style="text-align: center; margin-bottom: 24px;" class="text-cursive">Your Stats</h2>
+
+        <div class="avatar-preview" id="currentAvatar" style="overflow:hidden;"></div>
+
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h3 id="currentUserName" style="font-size: 1.35rem; font-weight: 800; margin-bottom: 8px;">You</h3>
+          <div class="streak-badge" style="margin: 0 auto; display: inline-flex;">
+            <i class="fa-solid fa-fire"></i> <span id="currentUserStreak">1</span> Day Streak
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="background: var(--bg-color); border-radius: 12px; padding: 16px; text-align: center; border: 1px dashed var(--border);">
+            <div id="userStories" style="font-size: 1.6rem; font-weight: 800; color: var(--primary); font-family: var(--font-pixel);">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;">Stories</div>
+          </div>
+          <div style="background: var(--bg-color); border-radius: 12px; padding: 16px; text-align: center; border: 1px dashed var(--border);">
+            <div id="userLikes" style="font-size: 1.6rem; font-weight: 800; color: #ef4444; font-family: var(--font-pixel);">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px;">Likes</div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px;">
+          <div class="dicebear-section-title">Choose Avatar</div>
+
+          <!-- Style Category Tabs -->
+          <div class="dicebear-tabs" id="dbTabs">
+            <button class="db-tab active" data-cat="illustrated">✨ Illustrated</button>
+            <button class="db-tab" data-cat="artistic">🎨 Artistic</button>
+            <button class="db-tab" data-cat="fun">🎉 Fun</button>
+          </div>
+
+          <!-- Character Grid -->
+          <div class="dicebear-grid" id="dicebearGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <a href="write.html" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 24px; border-radius: 40px;">
+          <i class="fa-solid fa-pen-nib"></i> Write a Blog
+        </a>
+      </div>
+    </div>
+
+    <!-- Right Column: Leaderboard -->
+    <div>
+      <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 8px;">Top Writers <i class="fa-solid fa-crown" style="color: var(--gold)"></i></h1>
+      <p class="text-secondary" style="margin-bottom: 32px;">Scores are based on likes received and stories published.</p>
+      
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Writer</th>
+            <th>Stories</th>
+            <th>Likes</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Share FAB -->
+  <div class="fab" id="shareFab" title="Share Story Card">
+    <i class="fa-solid fa-share-nodes"></i>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/blog.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Setup current user
+      const currentUser = JSON.parse(localStorage.getItem('writania_currentUser'));
+      const currentAvatarDisplay = document.getElementById('currentAvatar');
+      const currentUserName = document.getElementById('currentUserName');
+      const currentUserStreak = document.getElementById('currentUserStreak');
+      
+      if (currentUser) {
+        currentAvatarDisplay.innerHTML = `<img src="${currentUser.avatar || 'img/avatar1.png'}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        currentUserName.textContent = currentUser.name;
+        currentUserStreak.textContent = currentUser.streak || 1;
+
+        // Calculate user's stories & likes from blogs
+        const allBlogs = JSON.parse(localStorage.getItem('writania_blogs')) || [];
+        const myBlogs = allBlogs.filter(b => b.authorId === currentUser.id || b.author === currentUser.name);
+        const myLikes = myBlogs.reduce((sum, b) => sum + (b.likes || 0), 0);
+        document.getElementById('userStories').textContent = myBlogs.length;
+        document.getElementById('userLikes').textContent = myLikes;
+
+        // ---- PREMIUM DICEBEAR CHARACTER PICKER ----
+        const seed = encodeURIComponent(currentUser.name || 'Writania');
+        const bgPalettes = [
+          'b6e3f4,c0aede',
+          'd1d4f9,ffd5dc',
+          'ffdfbf,ffd5dc',
+          'c0e8d5,b6e3f4',
+          'f9d1d4,d1d4f9',
+        ];
+
+        const styleCategories = {
+          illustrated: [
+            { id: 'lorelei',       label: 'Lorelei' },
+            { id: 'adventurer',    label: 'Adventurer' },
+            { id: 'micah',         label: 'Micah' },
+            { id: 'personas',      label: 'Personas' },
+            { id: 'open-peeps',    label: 'Open Peeps' },
+            { id: 'miniavs',       label: 'Miniavs' },
+          ],
+          artistic: [
+            { id: 'croodles',      label: 'Croodles' },
+            { id: 'notionists',    label: 'Notionists' },
+            { id: 'thumbs',        label: 'Thumbs' },
+            { id: 'shapes',        label: 'Shapes' },
+            { id: 'identicon',     label: 'Identicon' },
+            { id: 'initials',      label: 'Initials' },
+          ],
+          fun: [
+            { id: 'fun-emoji',     label: 'Fun Emoji' },
+            { id: 'bottts',        label: 'Bottts' },
+            { id: 'pixel-art',     label: 'Pixel Art' },
+            { id: 'avataaars',     label: 'Avataaars' },
+            { id: 'big-ears',      label: 'Big Ears' },
+            { id: 'rings',         label: 'Rings' },
+          ]
+        };
+
+        let currentCat = 'illustrated';
+
+        function buildGrid(cat) {
+          const grid = document.getElementById('dicebearGrid');
+          grid.innerHTML = '';
+          styleCategories[cat].forEach((style, idx) => {
+            const bg = bgPalettes[idx % bgPalettes.length];
+            const url = `https://api.dicebear.com/7.x/${style.id}/svg?seed=${seed}&backgroundColor=${bg}&radius=50`;
+            const isSelected = currentUser.avatar === url;
+
+            const card = document.createElement('div');
+            card.className = 'db-card' + (isSelected ? ' selected' : '');
+
+            // Subtle gradient tint per card
+            const tints = [
+              'linear-gradient(145deg,#f0f4ff,#fafafe)',
+              'linear-gradient(145deg,#fff5f5,#fff0ff)',
+              'linear-gradient(145deg,#f0fff8,#f0faff)',
+              'linear-gradient(145deg,#fffbf0,#fff5f5)',
+              'linear-gradient(145deg,#f5f0ff,#f0f4ff)',
+              'linear-gradient(145deg,#f0faff,#f0fff8)',
+            ];
+            card.style.background = tints[idx % tints.length];
+
+            card.innerHTML = `
+              <img class="db-avatar-img" src="${url}" alt="${style.label}" loading="lazy">
+              <div class="db-style-label">${style.label}</div>
+            `;
+
+            card.addEventListener('click', () => {
+              currentUser.avatar = url;
+              updateUser(currentUser);
+              currentAvatarDisplay.innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+              document.querySelectorAll('.db-card').forEach(c => c.classList.remove('selected'));
+              card.classList.add('selected');
+              showToast('✨ Avatar updated!');
+            });
+
+            grid.appendChild(card);
+          });
+        }
+
+        // Tab switching
+        document.querySelectorAll('.db-tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.db-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentCat = tab.dataset.cat;
+            buildGrid(currentCat);
+          });
+        });
+
+        buildGrid(currentCat);
+      }
+
+      // Calculate stats for all users based on published blogs
+      const blogs = JSON.parse(localStorage.getItem('writania_blogs')) || [];
+      const users = JSON.parse(localStorage.getItem('writania_users')) || [];
+      
+      const rankedUsers = users.map(user => {
+        const userBlogs = blogs.filter(b => b.authorId === user.id || b.author === user.name);
+        const userLikes = userBlogs.reduce((sum, b) => sum + (b.likes || 0), 0);
+        const userStories = userBlogs.length;
+        
+        return {
+          ...user,
+          stories: userStories,
+          likes: userLikes,
+          score: userLikes + (userStories * 100)
+        };
+      }).sort((a, b) => b.score - a.score);
+
+      const leaderboardBody = document.getElementById('leaderboardBody');
+      
+      rankedUsers.forEach((user, index) => {
+        const rank = index + 1;
+        let rankClass = '';
+        let rankContent = rank;
+        
+        if (rank === 1) { rankClass = 'rank-1'; rankContent = '<i class="fa-solid fa-trophy"></i>'; }
+        else if (rank === 2) { rankClass = 'rank-2'; rankContent = '<i class="fa-solid fa-medal"></i>'; }
+        else if (rank === 3) { rankClass = 'rank-3'; rankContent = '<i class="fa-solid fa-award"></i>'; }
+
+        const rowHtml = `
+          <tr>
+            <td class="rank-cell ${rankClass}">${rankContent}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-color); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; overflow: hidden; border: 1px solid var(--border);">
+                  <img src="${getAvatarUrl(user.avatar, user.name)}" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div>
+                  <div style="font-weight: 600; color: var(--text-primary); cursor: pointer;" onclick="window.location.href='profile.html?id=${user.id}'">${user.name}</div>
+                  <div class="streak-badge" style="font-size: 0.6rem; margin-top: 4px;">
+                    <i class="fa-solid fa-fire"></i> ${user.streak || 1}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td style="font-weight: 500;">${user.stories}</td>
+            <td style="font-weight: 500; color: #ef4444;"><i class="fa-solid fa-heart"></i> ${user.likes}</td>
+            <td style="font-weight: 800; color: var(--primary); font-family: var(--font-pixel); font-size: 0.8rem;">
+              ${user.score.toLocaleString()}
+            </td>
+          </tr>
+        `;
+        leaderboardBody.innerHTML += rowHtml;
+      });
+
+      // Share FAB logic
+      document.getElementById('shareFab').addEventListener('click', () => {
+        const textToShare = `✨ I'm a storyteller on Writania! ✨\n\nWriter: ${currentUser.name}\n📝 ${currentUser.stories} stories written\n❤️ ${currentUser.likes} likes received\n🔥 ${currentUser.streak} day streak\n\nJoin me on Writania!`;
+        
+        if (navigator.share) {
+          navigator.share({
+            title: 'My Writania Story Card',
+            text: textToShare
+          }).catch(console.error);
+        } else {
+          navigator.clipboard.writeText(textToShare).then(() => {
+            showToast('Story card copied to clipboard!');
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
